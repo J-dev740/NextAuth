@@ -1,5 +1,5 @@
 import NextAuth from "next-auth/next";
-import { CredentialsProvider } from "next-auth/providers";
+import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from 'bcrypt'
 import { PrismaAdapter } from "@auth/prisma-adapter";
 // import { Prisma } from "@prisma/client";
@@ -21,12 +21,44 @@ export const authOptions={
                 //nextauth does provide a build in unbranded signin page at a particular url GET/api/auth/signin
                 //but we are going to build a custom tailwind interface 
                 username: { label: "Username", type: "text", placeholder: "John Doe" },
-                password: {  label: "Password", type: "password" }
+                password: {  label: "Password", type: "password" },
+                email:{label:'Email',type:'email'}
             },
             //callback that initiates when you are trying to login to check the authenticity of the user if  the user exists or not if exists then does the password match
             async authorize(credentials){
                 //this is where all the login functionality is going to go
-            }
+                //check to see if email and password is valid
+                if(!credentials.email || !credentials.password){
+                    console.log('no email or password found ')
+                    return null
+                    
+                }
+                //check to see if the user exists
+                const user = await prisma.user.findUnique({
+                    where:{
+                        email:credentials.email,
+
+                    }
+                })
+
+                if(!user){
+                    console.log('no user found')
+                    return null 
+                    
+                }
+                //if the user is found
+                //check to see if the user typed in the correct password 
+                const passwordMatch= await bcrypt.compare(credentials.password,user.hashedPassword)
+                if(!passwordMatch)
+                {
+                    console.log('no password match')
+                    return null 
+                }
+                //return user object if everything is valid
+                console.log('returning user found...')
+                return user;
+
+            } 
         })
 
     ],
