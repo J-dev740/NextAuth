@@ -13,6 +13,11 @@ export default function DashboardPage() {
 
 
   return (
-    <div>DashboardPage</div>
+    <div>
+        <h1 className='font-bold  text-emerald-950 font-serif text-center'>DashBoard</h1>
+        <p className='text-bold text-black font-bold text-center'>hello {session.user.name}</p>
+        
+    </div>
+    
   )
 }
